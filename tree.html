@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Family Tree</title>
+        <script src="FamilyTree.js"></script>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet" />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+        <style>
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            html,
+            body {
+                height: 100%;
+                width: 100%;
+                font-family: Arial, sans-serif;
+            }
+
+            .main-container {
+                height: 100%;
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 15px 30px;
+                background: #f5f5f5;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .header h1 {
+                font-size: 24px;
+                color: #333;
+            }
+
+            .header .export-buttons button {
+                margin-left: 10px;
+                padding: 8px 16px;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+            .header .export-buttons button:hover {
+                background-color: #0056b3;
+            }
+
+            .export-buttons {
+                padding: 10px;
+                background: #f5f5f5;
+                text-align: center;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .export-buttons button {
+                padding: 8px 14px;
+                margin-right: 8px;
+                font-size: 14px;
+                border: none;
+                background-color: #007bff;
+                color: white;
+                border-radius: 4px;
+                cursor: pointer;
+            }
+
+            .tree-wrapper {
+                width: 100%;
+                height: 100%;
+                /* flex: 1;
+                display: flex;
+                justify-content: center;
+                align-items: center; */
+                padding: 40px; /* Padding on all sides */
+                /* background-color: #ffffff; */
+            }
+
+            #tree {
+                /* margin: 0 20px; */
+                width: 100%;
+                height: calc(100% - 10px);
+                border: 1px solid #ccc; /* Optional: just to see the boundary */
+                /* padding: 20px; Optional internal padding inside tree div */
+                /* background-color: #fafafa; */
+            }
+        </style>
+    </head>
+    <body>
+        <div class="main-container">
+            <!-- <div class="header">
+                <h2>The Mujawar Family Tree</h2>
+                <div class="export-buttons">
+                    <select id="orientation-select" title="Change Orientation">
+                        <option value="top">Top</option>
+                        <option value="bottom">Bottom</option>
+                        <option value="left" selected>Left</option>
+                        <option value="right">Right</option>
+                    </select>
+
+                    <button onclick="exportPDF()" title="Export to PDF">
+                        <i class="fas fa-file-pdf"></i>
+                    </button>
+                    <button onclick="exportPNG()" title="Export to PNG">
+                        <i class="fas fa-image"></i>
+                    </button>
+                </div>
+            </div> -->
+
+            <nav class="navbar navbar-expand-lg navbar-light bg-light px-3">
+                <a class="navbar-brand" href="#">The Mujawar Family</a>
+
+                <button
+                    class="navbar-toggler"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#navbarControls"
+                    aria-controls="navbarControls"
+                    aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div
+                    class="collapse navbar-collapse justify-content-end"
+                    id="navbarControls">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="form-check form-switch">
+                            <input
+                                class="form-check-input"
+                                type="checkbox"
+                                id="minimapToggle" />
+                            <label class="form-check-label" for="minimapToggle"
+                                >Minimap</label
+                            >
+                        </div>
+                        <select
+                            class="form-select form-select-sm"
+                            id="orientation-select"
+                            title="Change Orientation">
+                            <option value="top" selected>Top</option>
+                            <option value="bottom">Bottom</option>
+                            <option value="left">Left</option>
+                            <option value="right">Right</option>
+                        </select>
+
+                        <button
+                            class="btn btn-outline-primary btn-sm"
+                            onclick="exportPDF()"
+                            title="Export to PDF"
+                            data-bs-toggle="tooltip">
+                            <i class="fas fa-file"></i>
+                        </button>
+
+                        <button
+                            class="btn btn-outline-primary btn-sm"
+                            onclick="exportPNG()"
+                            title="Export to PNG"
+                            data-bs-toggle="tooltip">
+                            <i class="fas fa-image"></i>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="tree-wrapper">
+                <div id="tree"></div>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+        <script>
+            FamilyTree.templates.tommy_female.defs = `<g transform="matrix(0.05,0,0,0.05,-12,-9)" id="heart">
+                <path fill="#F57C00" d="M438.482,58.61c-24.7-26.549-59.311-41.655-95.573-41.711c-36.291,0.042-70.938,15.14-95.676,41.694l-8.431,8.909  l-8.431-8.909C181.284,5.762,98.663,2.728,45.832,51.815c-2.341,2.176-4.602,4.436-6.778,6.778 c-52.072,56.166-52.072,142.968,0,199.134l187.358,197.581c6.482,6.843,17.284,7.136,24.127,0.654 c0.224-0.212,0.442-0.43,0.654-0.654l187.29-197.581C490.551,201.567,490.551,114.77,438.482,58.61z"/>
+            <g>`;
+            FamilyTree.templates.tommy_male.defs = `<g transform="matrix(0.05,0,0,0.05,-12,-9)" id="heart">
+                <path fill="#F57C00" d="M438.482,58.61c-24.7-26.549-59.311-41.655-95.573-41.711c-36.291,0.042-70.938,15.14-95.676,41.694l-8.431,8.909  l-8.431-8.909C181.284,5.762,98.663,2.728,45.832,51.815c-2.341,2.176-4.602,4.436-6.778,6.778 c-52.072,56.166-52.072,142.968,0,199.134l187.358,197.581c6.482,6.843,17.284,7.136,24.127,0.654 c0.224-0.212,0.442-0.43,0.654-0.654l187.29-197.581C490.551,201.567,490.551,114.77,438.482,58.61z"/>
+            <g>`;
+            let orientation = 'top';
+            let miniMapCheck = false;
+
+            let family = null;
+
+            function initTree(orientation = 'top', miniMap = false) {
+                family = new FamilyTree('#tree', {
+                    template: 'hugo',
+                    // orientation: FamilyTree.orientation.top,
+                    orientation: FamilyTree.orientation[orientation],
+                    mode: 'dark',
+                    // scaleInitial: FamilyTree.match.boundary,
+                    scaleInitial: 0.3,
+
+                    scaleMax: 1,
+                    miniMap: miniMap,
+
+                    siblingSeparation: 60,
+                    subtreeSeparation: 60,
+
+                    // mouseScrool: FamilyTree.action.zoom,
+                    // collapsing: true,
+                    // options
+                    nodeBinding: {
+                        field_0: 'name',
+                        field_1: 'DOB',
+                        img_0: 'photo',
+                    },
+                });
+
+                family.load([
+                    {
+                        id: 1,
+                        pids: [2],
+                        name: 'Abdul Qadir',
+                        DOB: '1898 - 1975',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/1.png',
+                    },
+                    {
+                        id: 2,
+                        pids: [1],
+                        name: 'Kulsum',
+                        DOB: '1911 - 2004',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/2.png',
+                    },
+                    {
+                        id: 3,
+                        mid: 2,
+                        fid: 1,
+                        pids: [9],
+                        name: 'Abdul Wahhab',
+                        DOB: '1955 - 2010',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/3.png',
+                    },
+                    {
+                        id: 4,
+                        mid: 2,
+                        fid: 1,
+                        pids: [10],
+                        name: 'Mohammad Haafiz',
+                        DOB: '1937 - 2019',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/4.png',
+                    },
+                    {
+                        id: 5,
+                        mid: 2,
+                        fid: 1,
+                        pids: [11],
+                        name: 'Mohammad Haroon',
+                        DOB: '1940 - 1984',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/5.png',
+                    },
+                    {
+                        id: 6,
+                        mid: 2,
+                        fid: 1,
+                        pids: [12],
+                        name: 'Zohra',
+                        DOB: '1944 - 2018',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/6.png',
+                    },
+                    {
+                        id: 7,
+                        mid: 2,
+                        fid: 1,
+                        pids: [13, 14],
+                        name: 'Abida',
+                        DOB: '1947 - 2020',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/7.png',
+                    },
+                    {
+                        id: 8,
+                        mid: 2,
+                        fid: 1,
+                        pids: [15],
+                        name: 'Abdul Samad',
+                        DOB: '1949',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/8.png',
+                    },
+                    {
+                        id: 9,
+                        pids: [3],
+                        name: 'Noor Jahan',
+                        DOB: '1948 - ',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/9.png',
+                    },
+
+                    {
+                        id: 10,
+                        pids: [4],
+                        name: 'Samunisa',
+                        DOB: '1950 - 2001',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/10.png',
+                    },
+                    {
+                        id: 11,
+                        pids: [5],
+                        name: 'Razia',
+                        DOB: '1948 - ',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/11.png',
+                    },
+                    {
+                        id: 12,
+                        pids: [6],
+                        name: 'Abdul Aziz',
+                        DOB: '1937 - 2017',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/12.png',
+                    },
+                    {
+                        id: 13,
+                        pids: [7],
+                        name: 'Ajmal',
+                        DOB: '1942 - 1984',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/0.png',
+                    },
+                    {
+                        id: 14,
+                        pids: [7],
+                        name: 'Gafoor',
+                        DOB: '0000 - 1999',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/0.png',
+                    },
+                    {
+                        id: 15,
+                        pids: [8],
+                        name: 'Noor Jahan',
+                        DOB: '1958 - 2012',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/15.png',
+                    },
+                    {
+                        id: 16,
+                        mid: 9,
+                        fid: 3,
+                        pids: [34],
+                        name: 'Rizwana',
+                        DOB: '1969',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/16.png',
+                    },
+                    {
+                        id: 17,
+                        mid: 9,
+                        fid: 3,
+                        pids: [35],
+                        name: 'Riyaz',
+                        DOB: '1971',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/17.png',
+                    },
+                    {
+                        id: 18,
+                        mid: 9,
+                        fid: 3,
+                        pids: [36],
+                        name: 'Rehana',
+                        DOB: '1973',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/18.png',
+                    },
+                    {
+                        id: 19,
+                        mid: 9,
+                        fid: 3,
+                        pids: [37],
+                        name: 'Abdul Wahhab (Bablu)',
+                        DOB: '1975',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/19.png',
+                    },
+                    {
+                        id: 20,
+                        mid: 9,
+                        fid: 3,
+                        pids: [38],
+                        name: 'Wasim',
+                        DOB: '1978',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/20.png',
+                    },
+                    {
+                        id: 21,
+                        mid: 10,
+                        fid: 4,
+                        pids: [39],
+                        name: 'Ashraf',
+                        DOB: '1973',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/21.png',
+                    },
+                    {
+                        id: 22,
+                        mid: 10,
+                        fid: 4,
+                        pids: [40],
+                        name: 'Aliya',
+                        DOB: '1975',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/0.png',
+                    },
+                    {
+                        id: 23,
+                        mid: 10,
+                        fid: 4,
+                        pids: [41],
+                        name: 'Asma',
+                        DOB: '1978',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/0.png',
+                    },
+                    {
+                        id: 24,
+                        mid: 11,
+                        fid: 5,
+                        pids: [42],
+                        name: 'Irfana',
+                        DOB: '1971',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/24.png',
+                    },
+                    {
+                        id: 25,
+                        mid: 11,
+                        fid: 5,
+                        pids: [43],
+                        name: 'Vasiullah',
+                        DOB: '1972',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/25.png',
+                    },
+                    {
+                        id: 26,
+                        mid: 11,
+                        fid: 5,
+                        pids: [44],
+                        name: 'Shaheen',
+                        DOB: '1975',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/26.png',
+                    },
+                    {
+                        id: 27,
+                        mid: 11,
+                        fid: 5,
+                        pids: [45],
+                        name: 'Tehseen',
+                        DOB: '1976',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/27.png',
+                    },
+                    {
+                        id: 28,
+                        mid: 12,
+                        fid: 6,
+                        // pids: [15],
+                        name: 'Shahaab',
+                        DOB: '1974',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/28.png',
+                    },
+                    {
+                        id: 29,
+                        mid: 12,
+                        fid: 6,
+                        // pids: [15],
+                        name: 'Zaida',
+                        DOB: '1976',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/29.png',
+                    },
+                    {
+                        id: 30,
+                        mid: 12,
+                        fid: 6,
+                        // pids: [15],
+                        name: 'Hamida',
+                        DOB: '1977 - 2022',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/30.png',
+                    },
+                    {
+                        id: 31,
+                        mid: 15,
+                        fid: 8,
+                        pids: [46],
+                        name: 'Sofia',
+                        DOB: '1982',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/31.png',
+                    },
+                    {
+                        id: 32,
+                        mid: 15,
+                        fid: 8,
+                        // pids: [15],
+                        name: 'Nilofar',
+                        DOB: '1985',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/32.png',
+                    },
+                    {
+                        id: 33,
+                        mid: 15,
+                        fid: 8,
+                        pids: [47],
+                        name: 'Farah',
+                        DOB: '1986',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/33.png',
+                    },
+                    {
+                        id: 34,
+                        pids: [16],
+                        name: 'Anwar',
+                        DOB: '1967',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/34.png',
+                    },
+                    {
+                        id: 35,
+                        pids: [17],
+                        name: 'Zahira',
+                        DOB: '1978',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/35.png',
+                    },
+                    {
+                        id: 36,
+                        pids: [18],
+                        name: 'Ayaz',
+                        DOB: '1971',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/36.png',
+                    },
+                    {
+                        id: 37,
+                        pids: [19],
+                        name: 'Nazneen',
+                        DOB: '1978',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/37.png',
+                    },
+                    {
+                        id: 38,
+                        pids: [20],
+                        name: 'Reshma',
+                        DOB: '1987',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/38.png',
+                    },
+                    {
+                        id: 39,
+                        pids: [21],
+                        name: 'Firdous',
+                        DOB: '1983',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/39.png',
+                    },
+                    {
+                        id: 40,
+                        pids: [22],
+                        name: 'Umer',
+                        DOB: '1963',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/40.png',
+                    },
+                    {
+                        id: 41,
+                        pids: [23],
+                        name: 'Musawir',
+                        DOB: '1975 - 2011',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/41.png',
+                    },
+                    {
+                        id: 42,
+                        pids: [24],
+                        name: 'Mehmood',
+                        DOB: '1956',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/42.png',
+                    },
+                    {
+                        id: 43,
+                        pids: [25],
+                        name: 'Nikhat',
+                        DOB: '1976',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/43.png',
+                    },
+                    {
+                        id: 44,
+                        pids: [26],
+                        name: 'Zakir',
+                        DOB: '1964',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/44.png',
+                    },
+                    {
+                        id: 45,
+                        pids: [23],
+                        name: 'Khalid',
+                        DOB: '1969',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/45.png',
+                    },
+                    {
+                        id: 46,
+                        pids: [31],
+                        name: 'Sarfaraz',
+                        DOB: '1979',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/46.png',
+                    },
+                    {
+                        id: 47,
+                        pids: [33],
+                        name: 'Swaroop',
+                        DOB: '1952',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/47.png',
+                    },
+                    {
+                        id: 48,
+                        mid: 16,
+                        fid: 34,
+                        // pids: [15],
+                        name: 'Aqeed',
+                        DOB: '1998',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/48.png',
+                    },
+                    {
+                        id: 49,
+                        mid: 16,
+                        fid: 34,
+                        // pids: [47],
+                        name: 'Museb',
+                        DOB: '2000',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/49.png',
+                    },
+                    {
+                        id: 50,
+                        mid: 35,
+                        fid: 17,
+                        // pids: [15],
+                        name: 'Zaid',
+                        DOB: '2003',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/50.png',
+                    },
+                    {
+                        id: 51,
+                        mid: 35,
+                        fid: 17,
+                        // pids: [47],
+                        name: 'Huzeifa',
+                        DOB: '2006',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/51.png',
+                    },
+                    {
+                        id: 52,
+                        mid: 36,
+                        fid: 18,
+                        pids: [82],
+                        name: 'Almas',
+                        DOB: '1997',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/52.png',
+                    },
+                    {
+                        id: 53,
+                        mid: 36,
+                        fid: 18,
+                        // pids: [47],
+                        name: 'Asma',
+                        DOB: '2002',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/53.png',
+                    },
+                    {
+                        id: 54,
+                        mid: 37,
+                        fid: 19,
+                        // pids: [47],
+                        name: 'Abdul Ahad',
+                        DOB: '2010',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/54.png',
+                    },
+                    {
+                        id: 55,
+                        mid: 38,
+                        fid: 20,
+                        // pids: [47],
+                        name: 'Zainab',
+                        DOB: '2010',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/55.png',
+                    },
+                    {
+                        id: 56,
+                        mid: 38,
+                        fid: 20,
+                        // pids: [47],
+                        name: 'Junaid',
+                        DOB: '2016',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/56.png',
+                    },
+                    {
+                        id: 57,
+                        mid: 39,
+                        fid: 21,
+                        // pids: [47],
+                        name: 'Yusuf',
+                        DOB: '2002',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/57.png',
+                    },
+                    {
+                        id: 58,
+                        mid: 39,
+                        fid: 21,
+                        // pids: [47],
+                        name: 'Kulsum',
+                        DOB: '2007',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/58.png',
+                    },
+                    {
+                        id: 59,
+                        mid: 39,
+                        fid: 21,
+                        // pids: [47],
+                        name: 'Abdullah',
+                        DOB: '2009',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/59.png',
+                    },
+                    {
+                        id: 60,
+                        mid: 40,
+                        fid: 22,
+                        // pids: [47],
+                        name: 'Farooq',
+                        DOB: '1993',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/60.png',
+                    },
+                    {
+                        id: 61,
+                        mid: 40,
+                        fid: 22,
+                        // pids: [47],
+                        name: 'Fatima',
+                        DOB: '2001',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/0.png',
+                    },
+                    {
+                        id: 62,
+                        mid: 41,
+                        fid: 23,
+                        // pids: [47],
+                        name: 'Zainab',
+                        DOB: '2002',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/62.png',
+                    },
+                    {
+                        id: 63,
+                        mid: 41,
+                        fid: 23,
+                        // pids: [47],
+                        name: 'Hamza',
+                        DOB: '2004',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/63.png',
+                    },
+                    {
+                        id: 64,
+                        mid: 41,
+                        fid: 23,
+                        // pids: [47],
+                        name: 'Talha',
+                        DOB: '2008',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/64.png',
+                    },
+                    {
+                        id: 65,
+                        mid: 42,
+                        fid: 24,
+                        pids: [83],
+                        name: 'Mubina',
+                        DOB: '1991',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/65.png',
+                    },
+                    {
+                        id: 66,
+                        mid: 42,
+                        fid: 24,
+                        pids: [84],
+                        name: 'Muzakkir',
+                        DOB: '1995',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/66.png',
+                    },
+                    {
+                        id: 67,
+                        mid: 42,
+                        fid: 24,
+                        // pids: [47],
+                        name: 'Musaddiq',
+                        DOB: '2002',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/67.png',
+                    },
+                    {
+                        id: 68,
+                        mid: 43,
+                        fid: 25,
+                        // pids: [47],
+                        name: 'Abdul Hannan',
+                        DOB: '2000',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/68.png',
+                    },
+                    {
+                        id: 69,
+                        mid: 43,
+                        fid: 25,
+                        // pids: [47],
+                        name: 'Abdul Mannan',
+                        DOB: '2000',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/69.png',
+                    },
+                    {
+                        id: 70,
+                        mid: 43,
+                        fid: 25,
+                        // pids: [47],
+                        name: 'Muhammad Haroon',
+                        DOB: '2002',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/70.png',
+                    },
+                    {
+                        id: 71,
+                        mid: 43,
+                        fid: 25,
+                        // pids: [47],
+                        name: 'Abdul Salaam',
+                        DOB: '2009',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/71.png',
+                    },
+                    {
+                        id: 72,
+                        mid: 43,
+                        fid: 25,
+                        // pids: [47],
+                        name: 'Rooshda',
+                        DOB: '2010',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/72.png',
+                    },
+                    {
+                        id: 73,
+                        mid: 44,
+                        fid: 26,
+                        // pids: [47],
+                        name: 'Abdul Muqeet',
+                        DOB: '1997',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/73.png',
+                    },
+                    {
+                        id: 74,
+                        mid: 44,
+                        fid: 26,
+                        // pids: [47],
+                        name: 'Abdul Moiz',
+                        DOB: '1998',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/74.png',
+                    },
+                    {
+                        id: 75,
+                        mid: 44,
+                        fid: 26,
+                        pids: [85],
+                        name: 'Maaz',
+                        DOB: '1999',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/75.png',
+                    },
+                    {
+                        id: 76,
+                        mid: 44,
+                        fid: 26,
+                        // pids: [47],
+                        name: 'Madiha',
+                        DOB: '2002',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/76.png',
+                    },
+                    {
+                        id: 77,
+                        mid: 45,
+                        fid: 27,
+                        // pids: [47],
+                        name: 'Ahmed',
+                        DOB: '2002',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/77.png',
+                    },
+                    {
+                        id: 78,
+                        mid: 45,
+                        fid: 27,
+                        // pids: [47],
+                        name: 'Fatima',
+                        DOB: '2009',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/78.png',
+                    },
+                    {
+                        id: 79,
+                        mid: 31,
+                        fid: 46,
+                        // pids: [47],
+                        name: 'Mohammad Arhaan',
+                        DOB: '2010',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/79.png',
+                    },
+                    {
+                        id: 80,
+                        mid: 31,
+                        fid: 46,
+                        // pids: [47],
+                        name: 'Mohammad Zohaan',
+                        DOB: '2018',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/80.png',
+                    },
+                    {
+                        id: 81,
+                        mid: 33,
+                        fid: 47,
+                        // pids: [47],
+                        name: 'Ahaan',
+                        DOB: '2024',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/81.png',
+                    },
+                    {
+                        id: 82,
+                        pids: [52],
+                        name: 'Dayyan',
+                        DOB: '1993',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/82.png',
+                    },
+                    {
+                        id: 83,
+                        pids: [65],
+                        name: 'Asim',
+                        DOB: '1987',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/83.png',
+                    },
+                    {
+                        id: 84,
+                        pids: [66],
+                        name: 'Arfa',
+                        DOB: '1999',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/84.png',
+                    },
+                    {
+                        id: 85,
+                        pids: [75],
+                        name: 'Madiha',
+                        DOB: '2000',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/85.png',
+                    },
+                    {
+                        id: 86,
+                        mid: 52,
+                        fid: 82,
+                        name: 'Mohammad Emad',
+                        DOB: '2024',
+                        gender: 'male',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/86.png',
+                    },
+                    {
+                        id: 87,
+                        mid: 65,
+                        fid: 83,
+                        name: 'Aliza',
+                        DOB: '2016',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/87.png',
+                    },
+                    {
+                        id: 88,
+                        mid: 65,
+                        fid: 83,
+                        name: 'Rayyan',
+                        DOB: '2021',
+                        gender: 'female',
+                        photo: 'https://ahmujawar-files.s3.us-east-1.amazonaws.com/images/88.png',
+                    },
+                ]);
+
+                family.on(
+                    'expcollclick',
+                    function (sender, isCollapsing, nodeId) {
+                        var node = family.getNode(nodeId);
+                        if (isCollapsing) {
+                            family.expandCollapse(
+                                nodeId,
+                                [],
+                                node.ftChildrenIds
+                            );
+                        } else {
+                            family.expandCollapse(
+                                nodeId,
+                                node.ftChildrenIds,
+                                []
+                            );
+                        }
+                        return false;
+                    }
+                );
+
+                family.on('render-link', function (sender, args) {
+                    if (args.cnode.ppid != undefined)
+                        args.html +=
+                            '<use data-ctrl-ec-id="' +
+                            args.node.id +
+                            '" xlink:href="#heart" x="' +
+                            args.p.xa +
+                            '" y="' +
+                            args.p.ya +
+                            '"/>';
+                    if (
+                        args.cnode.isPartner &&
+                        args.node.partnerSeparation == 30
+                    )
+                        args.html +=
+                            '<use data-ctrl-ec-id="' +
+                            args.node.id +
+                            '" xlink:href="#heart" x="' +
+                            args.p.xb +
+                            '" y="' +
+                            args.p.yb +
+                            '"/>';
+                });
+            }
+
+            document.addEventListener('DOMContentLoaded', () => {
+                initTree(orientation, miniMapCheck); // default load
+
+                document
+                    .getElementById('minimapToggle')
+                    .addEventListener('change', function (e) {
+                        miniMapCheck = e.target.checked;
+                        miniMapCheck
+                            ? initTree(orientation, true)
+                            : initTree(orientation, false);
+                        // toggleMinimap(isMinimapEnabled); // call your minimap handler
+                    });
+
+                document
+                    .getElementById('orientation-select')
+                    .addEventListener('change', function (e) {
+                        orientation = e.target.value;
+                        initTree(orientation, miniMapCheck); // reload with new orientation
+                    });
+            });
+
+            function exportPDF() {
+                family.exportPDF({
+                    format: 'A4',
+                    orientation: 'portrait',
+                    padding: 100,
+                    // scale: 1.5,
+                });
+            }
+
+            function exportPNG() {
+                family.exportPNG();
+            }
+        </script>
+
+        <script></script>
+    </body>
+</html>
